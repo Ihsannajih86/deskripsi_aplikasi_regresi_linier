@@ -1,93 +1,178 @@
 ---
-title: "Deskripsi Aplikasi Shiny: Prediksi Regresi Linier"
-author: "Rara Dwi Davisca, Muhammad Ihsan Najih Amaniiiiii"
+title: "UAS Regresi Model, Membuat Aplikasi R Shiny untuk Prediksi Variabel Y Berdasarkan Variabel X"
+author: "Rara dwi davisca A32023000?? & Muhammad Ihsan Najih Amani A3202300031"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
     theme: flatly
-    highlight: zenburn
     toc: true
-    toc_float:
-      collapsed: true
-    df_print: paged
-bibliography: references.bib
+    toc_float: true
+    code_folding: hide
 ---
 
-```{=html}
-<style>
-body{
-text-align: justify}
-</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
-
-## Pendahuluan
-
+# 1. Pendahuluan
 Aplikasi ini dibuat menggunakan framework **Shiny di R** untuk melakukan **analisis regresi linier** terhadap dataset yang diunggah pengguna. Tujuannya adalah untuk membantu memprediksi nilai variabel target (*Y*) berdasarkan satu atau beberapa variabel independen (*X*).
 
+## 1.1 Latar Belakang
+Aplikasi web R Shiny ini dikembangkan untuk membantu analis data dalam melakukan analisis regresi terhadap dataset yang diunggah. Aplikasi ini bersifat generik dan dapat digunakan untuk berbagai jenis dataset dengan struktur kolom yang berbeda.
 
-## Desain Aplikasi
+## 1.2 Tujuan
+Tujuan dari aplikasi ini adalah:
+- Melakukan eksplorasi data awal (preview dan statistik deskriptif)
+- Menampilkan korelasi antar variabel numerik
+- Melakukan eksplorasi scatter plot interaktif
+- Melatih model regresi linier
+- Menyimpan dan memuat model
+- Memprediksi nilai baru dari data testing
 
+# 2. Desain Aplikasi
 Aplikasi terdiri dari dua bagian utama:
 - **UI (User Interface):** Menyediakan tampilan antarmuka pengguna.
 - **Server:** Mengelola logika backend, seperti pembacaan data, pelatihan model, visualisasi, dan prediksi.
 
+## 2.1 Struktur Aplikasi
+Aplikasi R Shiny ini terdiri dari 5 tab utama:
 
-## Alur Kerja Aplikasi
+### Tab 1: Data Preview
+- **Fungsi**: Menampilkan preview dataset dan ringkasan statistik
+- **Komponen**: 
+  - File input untuk upload dataset
+  - Data table untuk preview data
+  - Summary statistics table
+  - Informasi dimensi dataset
 
-1. **Pengguna mengunggah dataset `.csv`** sebagai data pelatihan (training).
-2. **Pengguna memilih variabel input (X) dan target (Y)** dari dataset tersebut.
-3. **Model regresi linier dilatih** berdasarkan input pengguna.
-4. **Pengguna dapat mengunggah dataset baru** untuk dilakukan prediksi menggunakan model yang sudah dilatih.
-5. Model dapat **disimpan** ke file `.rds` atau **dimuat kembali**.
+### Tab 2: Correlation Matrix
+- **Fungsi**: Menghitung dan menampilkan korelasi antar variabel numerik
+- **Komponen**:
+  - Matriks korelasi dalam bentuk tabel
+  - Heatmap korelasi menggunakan ggplot2
+  - Filter untuk variabel numerik
 
-## Fungsionalitas Aplikasi
+### Tab 3: Exploratory Analysis
+- **Fungsi**: Membuat scatter plot dari dua variabel yang dipilih user
+- **Komponen**:
+  - Dropdown untuk memilih variabel X dan Y
+  - Scatter plot dengan gradasi warna berdasarkan variabel target
+  - Opsi untuk menambahkan garis regresi
 
-### 1. Upload dan Pratinjau Data
+### Tab 4: Model Regresi
+- **Fungsi**: Membangun model regresi linier
+- **Komponen**:
+  - Input untuk memilih variabel prediktor dan target
+  - Ringkasan model (summary dan glance)
+  - Plot Actual vs Predicted
+  - Tombol untuk menyimpan model
 
-- File input untuk mengunggah dataset training.
-- Tabel output untuk menampilkan isi dataset.
-- Ringkasan statistik menggunakan fungsi `summary()`.
+### Tab 5: Prediksi Data Baru
+- **Fungsi**: Memprediksi nilai Y dari dataset baru
+- **Komponen**:
+  - Upload file testing data
+  - Load model yang tersimpan
+  - Hasil prediksi dalam bentuk tabel dan plot
 
-### 2. Pemilihan Variabel
+## 2.2 Alur Kerja Aplikasi
 
-- **X (independen):** Dapat memilih lebih dari satu.
-- **Y (dependen):** Hanya satu variabel target.
-- **Color (opsional):** Untuk keperluan visualisasi eksploratif.
+```{r workflow, echo=FALSE, fig.cap="Alur Kerja Aplikasi"}
+# Diagram alur kerja (bisa dibuat dengan DiagrammeR atau digraph)
+library(DiagrammeR)
+grViz("
+digraph workflow {
+  graph [rankdir = TB]
+  
+  node [shape = box, style = filled, fillcolor = lightblue]
+  A [label = 'Upload Dataset\\nTraining']
+  B [label = 'Data Preview\\n& Statistics']
+  C [label = 'Correlation\\nAnalysis']
+  D [label = 'Exploratory\\nAnalysis']
+  E [label = 'Build Regression\\nModel']
+  F [label = 'Save Model']
+  G [label = 'Upload Testing\\nData']
+  H [label = 'Load Model &\\nPredict']
+  
+  A -> B
+  B -> C
+  C -> D
+  D -> E
+  E -> F
+  F -> G
+  G -> H
+}
+")
+```
 
-### 3. Eksplorasi dan Korelasi
+# 3. Fungsionalitas Khusus
 
-- Menampilkan **correlation matrix** antar variabel numerik menggunakan `corrplot`.
-- Menampilkan **scatterplot** berdasarkan variabel yang dipilih pengguna.
+## 3.1 Generik untuk Berbagai Dataset
+- Aplikasi dapat membaca file CSV dengan struktur kolom yang berbeda
+- Otomatis mendeteksi tipe data (numerik, kategorikal)
+- Validasi input untuk memastikan kompatibilitas
 
-### 4. Pelatihan Model
+## 3.2 Penyimpanan dan Pemuatan Model
+- Model dapat disimpan menggunakan `saveRDS()`
+- Model dapat dimuat kembali menggunakan `readRDS()`
+- Validasi model sebelum prediksi
 
-- Model dilatih menggunakan fungsi `lm()`.
-- Formula regresi dibentuk secara dinamis: `Y ~ X1 + X2 + ...`.
-- Model disimpan sementara dengan `reactiveVal()` dan dapat diunduh.
+## 3.3 Validasi Data
+- Pengecekan data kosong atau missing values
+- Validasi format input
+- Pesan error yang informatif
 
-### 5. Prediksi Data Baru
+# 4. Dataset yang Digunakan
 
-- File input untuk mengunggah dataset testing.
-- Prediksi dilakukan terhadap data baru berdasarkan model yang sudah dilatih.
-- Output berupa tabel hasil prediksi.
+## 4.1 Dataset A: Prediksi Harga Barang
+Dataset buatan untuk prediksi harga barang dengan variabel:
+- `kualitas`: Kualitas produk (1-10)
+- `berat`: Berat produk (gram)
+- `brand_score`: Skor brand (1-5)
+- `umur_produk`: Umur produk (bulan)
+- `harga`: Harga produk (rupiah) - variabel target
 
-### 6. Simpan dan Muat Model
+## 4.2 Dataset B: Formula 1 Performance
+Dataset untuk analisis performa Formula 1 dengan variabel:
+- `engine_power`: Kekuatan mesin (HP)
+- `aerodynamics`: Skor aerodinamika (1-100)
+- `tire_quality`: Kualitas ban (1-10)
+- `driver_skill`: Skill driver (1-100)
+- `lap_time`: Waktu lap (detik) - variabel target
 
-- **`saveRDS()`**: Menyimpan model yang sudah dilatih dalam format `.rds`.
-- **`readRDS()`**: Memuat kembali model dari file `.rds`.
+# 5. Teknologi dan Library yang Digunakan
 
-## Kesimpulan
+```{r libraries, eval=FALSE}
+library(shiny)
+library(shinydashboard)
+library(DT)
+library(ggplot2)
+library(corrplot)
+library(broom)
+library(dplyr)
+library(plotly)
+```
 
-Aplikasi ini cocok digunakan sebagai alat bantu **pembelajaran regresi linier**, **eksperimen data**, serta **prediksi cepat berbasis antarmuka visual**. Pengguna dapat dengan mudah mengunggah data, melatih model, dan melakukan prediksi tanpa perlu menulis banyak kode.
+# 6. Kesimpulan
 
-## Paket yang Digunakan
+Aplikasi R Shiny ini menyediakan solusi komprehensif untuk analisis regresi dengan fitur-fitur:
+- Interface yang user-friendly
+- Eksplorasi data yang mendalam
+- Model regresi yang dapat disimpan dan dimuat ulang
+- Prediksi data baru yang akurat
+- Validasi input yang robust
 
-- `shiny`
-- `ggplot2`
-- `readr`
-- `dplyr`
-- `caret`
-- `corrplot`
-- `tidyr`
-- `broom`
+Aplikasi ini dapat digunakan untuk berbagai domain analisis data dan dapat dengan mudah disesuaikan untuk kebutuhan spesifik.
+
+---
+
+## Cara Menjalankan Aplikasi
+
+1. Install packages yang diperlukan
+2. Simpan file `app.R` dalam folder project
+3. Siapkan dataset training dan testing dalam format CSV
+4. Jalankan aplikasi dengan `shiny::runApp()`
+
+```{r run_app, eval=FALSE}
+# Jalankan aplikasi
+shiny::runApp()
+```
