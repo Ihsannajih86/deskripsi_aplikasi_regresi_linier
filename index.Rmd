@@ -1,0 +1,94 @@
+
+---
+title: "Deskripsi Aplikasi Shiny: Prediksi Regresi Linier"
+author: "Rara Dwi Davisca, Muhammad Ihsan Najih Amaniiiiii"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    toc: true
+    toc_float:
+      collapsed: true
+    df_print: paged
+bibliography: references.bib
+---
+
+```{=html}
+<style>
+body{
+text-align: justify}
+</style>
+```
+
+
+## Pendahuluan
+
+Aplikasi ini dibuat menggunakan framework **Shiny di R** untuk melakukan **analisis regresi linier** terhadap dataset yang diunggah pengguna. Tujuannya adalah untuk membantu memprediksi nilai variabel target (*Y*) berdasarkan satu atau beberapa variabel independen (*X*).
+
+
+## Desain Aplikasi
+
+Aplikasi terdiri dari dua bagian utama:
+- **UI (User Interface):** Menyediakan tampilan antarmuka pengguna.
+- **Server:** Mengelola logika backend, seperti pembacaan data, pelatihan model, visualisasi, dan prediksi.
+
+
+## Alur Kerja Aplikasi
+
+1. **Pengguna mengunggah dataset `.csv`** sebagai data pelatihan (training).
+2. **Pengguna memilih variabel input (X) dan target (Y)** dari dataset tersebut.
+3. **Model regresi linier dilatih** berdasarkan input pengguna.
+4. **Pengguna dapat mengunggah dataset baru** untuk dilakukan prediksi menggunakan model yang sudah dilatih.
+5. Model dapat **disimpan** ke file `.rds` atau **dimuat kembali**.
+
+## Fungsionalitas Aplikasi
+
+### 1. Upload dan Pratinjau Data
+
+- File input untuk mengunggah dataset training.
+- Tabel output untuk menampilkan isi dataset.
+- Ringkasan statistik menggunakan fungsi `summary()`.
+
+### 2. Pemilihan Variabel
+
+- **X (independen):** Dapat memilih lebih dari satu.
+- **Y (dependen):** Hanya satu variabel target.
+- **Color (opsional):** Untuk keperluan visualisasi eksploratif.
+
+### 3. Eksplorasi dan Korelasi
+
+- Menampilkan **correlation matrix** antar variabel numerik menggunakan `corrplot`.
+- Menampilkan **scatterplot** berdasarkan variabel yang dipilih pengguna.
+
+### 4. Pelatihan Model
+
+- Model dilatih menggunakan fungsi `lm()`.
+- Formula regresi dibentuk secara dinamis: `Y ~ X1 + X2 + ...`.
+- Model disimpan sementara dengan `reactiveVal()` dan dapat diunduh.
+
+### 5. Prediksi Data Baru
+
+- File input untuk mengunggah dataset testing.
+- Prediksi dilakukan terhadap data baru berdasarkan model yang sudah dilatih.
+- Output berupa tabel hasil prediksi.
+
+### 6. Simpan dan Muat Model
+
+- **`saveRDS()`**: Menyimpan model yang sudah dilatih dalam format `.rds`.
+- **`readRDS()`**: Memuat kembali model dari file `.rds`.
+
+## Kesimpulan
+
+Aplikasi ini cocok digunakan sebagai alat bantu **pembelajaran regresi linier**, **eksperimen data**, serta **prediksi cepat berbasis antarmuka visual**. Pengguna dapat dengan mudah mengunggah data, melatih model, dan melakukan prediksi tanpa perlu menulis banyak kode.
+
+## Paket yang Digunakan
+
+- `shiny`
+- `ggplot2`
+- `readr`
+- `dplyr`
+- `caret`
+- `corrplot`
+- `tidyr`
+- `broom`
