@@ -1,6 +1,6 @@
 ---
 title: "UAS Regresi Model, Membuat Aplikasi R Shiny untuk Prediksi Variabel Y Berdasarkan Variabel X"
-author: "Rara dwi davisca A3202300036 & Muhammad Ihsan Najih Amani A3202300031"
+author: "Rara dwi davisca A32023000?? & Muhammad Ihsan Najih Amani A3202300031"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -123,33 +123,31 @@ digraph workflow {
 
 # 4. Dataset yang Digunakan
 
-## 4.1 Dataset A: Prediksi Harga Barang
-Dataset buatan untuk prediksi harga barang dengan variabel:
-- `kualitas`: Kualitas produk (1-10)
-- `berat`: Berat produk (gram)
-- `brand_score`: Skor brand (1-5)
-- `umur_produk`: Umur produk (bulan)
-- `harga`: Harga produk (rupiah) - variabel target
+## 4.1 Dataset A: Prediksi Harga Rumah
+Dataset buatan untuk prediksi harga rumah dengan variabel:
+- `Luas_tanah`: Luas tanah tempat rumah tersebut (meter persegi)
+- `kamar_: Jumlah kamar pada rumah (1-5)
+- `Jarak_dari_pusat_kota`: jarak rumah dari pusat kota (Kilometer5)
+- `harga`: Harga Rumah (rupiah) - variabel target
 
-## 4.2 Dataset B: Formula 1 Performance
-Dataset untuk analisis performa Formula 1 dengan variabel:
-- `engine_power`: Kekuatan mesin (HP)
-- `aerodynamics`: Skor aerodinamika (1-100)
-- `tire_quality`: Kualitas ban (1-10)
-- `driver_skill`: Skill driver (1-100)
-- `lap_time`: Waktu lap (detik) - variabel target
+## 4.2 Dataset B: Prediksi Pemakaian Minyak Untuk Pemanas
+Dataset untuk analisis pemakaian minya dengan variabel:
+- `Avg_Age`: usia pemakai (Tahun)
+- `Heating_Oil`: Jumlah banyaknya minyak  pemanas(liter)
+- `Home_size`: Ukuran rumah pengguna (Satuan Ukuran rumah pada perumahan)
 
-# 5. Teknologi dan Library yang Digunakan
 
-```{r libraries, eval=FALSE}
-library(shiny)
-library(shinydashboard)
-library(DT)
-library(ggplot2)
-library(corrplot)
-library(broom)
-library(dplyr)
-library(plotly)
+# 5. Library yang Digunakan
+
+```
+library(shiny)           # Untuk membuat aplikasi web interaktif
+library(tidyverse)       # Untuk manipulasi data dan visualisasi
+library(DT)              # Menampilkan tabel interaktif
+library(ggplot2)         # Grafik visualisasi
+library(corrplot)        # Visualisasi korelasi variabel
+library(shinythemes)     # Tema tampilan aplikasi
+library(broom)           # Ringkasan hasil model
+library(readr)           # Membaca file CSV
 ```
 
 # 6. Kesimpulan

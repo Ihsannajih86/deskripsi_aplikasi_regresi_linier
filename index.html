@@ -11,7 +11,7 @@
 
 <meta name="author" content="Rara dwi davisca A32023000?? &amp; Muhammad Ihsan Najih Amani A3202300031" />
 
-<meta name="date" content="2025-07-09" />
+<meta name="date" content="2025-07-11" />
 
 <title>UAS Regresi Model, Membuat Aplikasi R Shiny untuk Prediksi Variabel Y Berdasarkan Variabel X</title>
 
@@ -2823,7 +2823,7 @@ border-radius: 0px;
 untuk Prediksi Variabel Y Berdasarkan Variabel X</h1>
 <h4 class="author">Rara dwi davisca A32023000?? &amp; Muhammad Ihsan
 Najih Amani A3202300031</h4>
-<h4 class="date">2025-07-09</h4>
+<h4 class="date">2025-07-11</h4>
 
 </div>
 
@@ -2929,8 +2929,8 @@ dipilih user</li>
 <div id="alur-kerja-aplikasi" class="section level2">
 <h2>2.2 Alur Kerja Aplikasi</h2>
 <div class="figure">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-27a2df345b22cd077cc0" style="width:672px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-27a2df345b22cd077cc0">{"x":{"diagram":"\ndigraph workflow {\n  graph [rankdir = TB]\n  \n  node [shape = box, style = filled, fillcolor = lightblue]\n  A [label = \"Upload Dataset\\nTraining\"]\n  B [label = \"Data Preview\\n& Statistics\"]\n  C [label = \"Correlation\\nAnalysis\"]\n  D [label = \"Exploratory\\nAnalysis\"]\n  E [label = \"Build Regression\\nModel\"]\n  F [label = \"Save Model\"]\n  G [label = \"Upload Testing\\nData\"]\n  H [label = \"Load Model &\\nPredict\"]\n  \n  A -> B\n  B -> C\n  C -> D\n  D -> E\n  E -> F\n  F -> G\n  G -> H\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-3ec1486992d51f7c4b84" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-3ec1486992d51f7c4b84">{"x":{"diagram":"\ndigraph workflow {\n  graph [rankdir = TB]\n  \n  node [shape = box, style = filled, fillcolor = lightblue]\n  A [label = \"Upload Dataset\\nTraining\"]\n  B [label = \"Data Preview\\n& Statistics\"]\n  C [label = \"Correlation\\nAnalysis\"]\n  D [label = \"Exploratory\\nAnalysis\"]\n  E [label = \"Build Regression\\nModel\"]\n  F [label = \"Save Model\"]\n  G [label = \"Upload Testing\\nData\"]\n  H [label = \"Load Model &\\nPredict\"]\n  \n  A -> B\n  B -> C\n  C -> D\n  D -> E\n  E -> F\n  F -> G\n  G -> H\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 Alur Kerja Aplikasi
 </p>
@@ -2967,34 +2967,32 @@ berbeda</li>
 </div>
 <div id="dataset-yang-digunakan" class="section level1">
 <h1>4. Dataset yang Digunakan</h1>
-<div id="dataset-a-prediksi-harga-barang" class="section level2">
-<h2>4.1 Dataset A: Prediksi Harga Barang</h2>
-<p>Dataset buatan untuk prediksi harga barang dengan variabel: -
-<code>kualitas</code>: Kualitas produk (1-10) - <code>berat</code>:
-Berat produk (gram) - <code>brand_score</code>: Skor brand (1-5) -
-<code>umur_produk</code>: Umur produk (bulan) - <code>harga</code>:
-Harga produk (rupiah) - variabel target</p>
+<div id="dataset-a-prediksi-harga-rumah" class="section level2">
+<h2>4.1 Dataset A: Prediksi Harga Rumah</h2>
+<p>Dataset buatan untuk prediksi harga rumah dengan variabel: -
+<code>Luas_tanah</code>: Luas tanah tempat rumah tersebut (meter
+persegi) -
+<code>kamar_: Jumlah kamar pada rumah (1-5) -</code>Jarak_dari_pusat_kota<code>: jarak rumah dari pusat kota (Kilometer5) -</code>harga`:
+Harga Rumah (rupiah) - variabel target</p>
 </div>
-<div id="dataset-b-formula-1-performance" class="section level2">
-<h2>4.2 Dataset B: Formula 1 Performance</h2>
-<p>Dataset untuk analisis performa Formula 1 dengan variabel: -
-<code>engine_power</code>: Kekuatan mesin (HP) -
-<code>aerodynamics</code>: Skor aerodinamika (1-100) -
-<code>tire_quality</code>: Kualitas ban (1-10) -
-<code>driver_skill</code>: Skill driver (1-100) - <code>lap_time</code>:
-Waktu lap (detik) - variabel target</p>
+<div id="dataset-b-prediksi-pemakaian-minyak-untuk-pemanas" class="section level2">
+<h2>4.2 Dataset B: Prediksi Pemakaian Minyak Untuk Pemanas</h2>
+<p>Dataset untuk analisis pemakaian minya dengan variabel: -
+<code>Avg_Age</code>: usia pemakai (Tahun) - <code>Heating_Oil</code>:
+Jumlah banyaknya minyak pemanas(liter) - <code>Home_size</code>: Ukuran
+rumah pengguna (Satuan Ukuran rumah pada perumahan)</p>
 </div>
 </div>
 <div id="teknologi-dan-library-yang-digunakan" class="section level1">
 <h1>5. Teknologi dan Library yang Digunakan</h1>
-<pre class="r"><code>library(shiny)
-library(shinydashboard)
-library(DT)
-library(ggplot2)
-library(corrplot)
-library(broom)
-library(dplyr)
-library(plotly)</code></pre>
+<pre><code>library(shiny)           # Untuk membuat aplikasi web interaktif
+library(tidyverse)       # Untuk manipulasi data dan visualisasi
+library(DT)              # Menampilkan tabel interaktif
+library(ggplot2)         # Grafik visualisasi
+library(corrplot)        # Visualisasi korelasi variabel
+library(shinythemes)     # Tema tampilan aplikasi
+library(broom)           # Ringkasan hasil model
+library(readr)           # Membaca file CSV</code></pre>
 </div>
 <div id="kesimpulan" class="section level1">
 <h1>6. Kesimpulan</h1>
