@@ -1,6 +1,6 @@
 ---
 title: "UAS Regresi Model, Membuat Aplikasi R Shiny untuk Prediksi Variabel Y Berdasarkan Variabel X"
-author: "Rara dwi davisca A32023000?? & Muhammad Ihsan Najih Amani A3202300031"
+author: "Rara dwi davisca A3202300036 & Muhammad Ihsan Najih Amani A3202300031"
 date: "`r Sys.Date()`"
 output:
   html_document:
