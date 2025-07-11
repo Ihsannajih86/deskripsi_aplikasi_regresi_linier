@@ -1,170 +1,168 @@
-# Load library yang dibutuhkan
-library(shiny)      # Untuk membuat aplikasi web interaktif
-library(ggplot2)     # Untuk visualisasi data
-library(readr)       # Untuk membaca file CSV
-library(dplyr)       # Untuk manipulasi data
-library(caret)       # Untuk machine learning (tidak dipakai langsung tapi mendukung pipeline)
-library(corrplot)    # Untuk membuat correlation matrix
-library(tidyr)       # Untuk fungsi manipulasi data seperti drop_na
-library(broom)       # Untuk merapikan output model agar mudah dibaca
+# ======================================
+# Aplikasi R Shiny: Analisis Regresi Linier
+# Fitur: Upload Data, Korelasi, Scatter Plot, Model Regresi, Prediksi
+# ======================================
 
-# Bagian UI dari aplikasi
+# --- Library yang digunakan ---
+library(shiny)           # Untuk membuat aplikasi web interaktif
+library(tidyverse)       # Untuk manipulasi data dan visualisasi
+library(DT)              # Menampilkan tabel interaktif
+library(ggplot2)         # Grafik visualisasi
+library(corrplot)        # Visualisasi korelasi variabel
+library(shinythemes)     # Tema tampilan aplikasi
+library(broom)           # Ringkasan hasil model
+library(readr)           # Membaca file CSV
+
+# --- UI Aplikasi ---
 ui <- fluidPage(
-  titlePanel("Aplikasi Prediksi Regresi Linier Variabel Y"),  # Judul aplikasi
-  
+  theme = shinytheme("cosmo"),  # Tema aplikasi
+  titlePanel("Aplikasi Analisis Regresi Linier"),
   sidebarLayout(
     sidebarPanel(
-      # Input file untuk dataset training (format .csv)
-      fileInput("data", "Unggah Dataset Training (.csv)", accept = ".csv"),
-      
-      # UI dinamis untuk memilih variabel X (fitur independen), Y (target), dan warna
-      uiOutput("xvar"),
-      uiOutput("yvar"),
-      uiOutput("colorvar"),
-      
-      # Tombol untuk melatih model regresi
-      actionButton("train", "Latih Model"),
-      
-      # Input file untuk dataset testing (data baru untuk diprediksi)
-      fileInput("newdata", "Unggah Dataset Testing (.csv)", accept = ".csv"),
-      
-      # Tombol untuk memicu proses prediksi
-      actionButton("predict", "Prediksi Data Baru"),
-      
-      # Input file model yang sudah disimpan sebelumnya (.rds)
-      fileInput("load_model", "Muat Model (.rds)", accept = ".rds"),
-      
-      # Tombol untuk menyimpan model yang sudah dilatih ke file .rds
-      downloadButton("savemodel", "Download Model (.rds)")
+      fileInput("train_data", "Unggah Dataset Training (.csv)", accept = ".csv"),
+      fileInput("test_data", "Unggah Dataset Testing (.csv)", accept = ".csv"),
+      uiOutput("var_select_ui"),  # Dropdown untuk memilih variabel X dan Y
+      actionButton("save_model", "Simpan Model"),
+      fileInput("load_model", "Muat Model (.rds)", accept = ".rds")
     ),
-    
-    # Tampilan utama terdiri dari beberapa tab:
     mainPanel(
       tabsetPanel(
-        tabPanel("Data Preview", tableOutput("datatable"), verbatimTextOutput("summary")),  # Pratinjau dan ringkasan data
-        tabPanel("Correlation Matrix", plotOutput("corrplot")),  # Visualisasi korelasi antar variabel numerik
-        tabPanel("Exploratory Analysis", plotOutput("scatterplot")),  # Visualisasi awal (scatterplot)
-        tabPanel("Model Regresi", verbatimTextOutput("modelsummary"), plotOutput("modelplot")),  # Hasil model dan visualisasi
-        tabPanel("Prediksi Data Baru", tableOutput("prediksi"))  # Output prediksi dari data baru
+        tabPanel("Data Preview",
+                 DTOutput("preview_table"),
+                 verbatimTextOutput("summary")
+        ),
+        tabPanel("Correlation Matrix",
+                 plotOutput("cor_plot")
+        ),
+        tabPanel("Exploratory Analysis",
+                 plotOutput("scatter_plot")
+        ),
+        tabPanel("Model Regresi",
+                 actionButton("build_model", "Bangun Model"),
+                 verbatimTextOutput("model_summary"),
+                 verbatimTextOutput("model_metrics"),
+                 plotOutput("actual_vs_pred")
+        ),
+        tabPanel("Prediksi Data Baru",
+                 DTOutput("predicted_table")
+        )
       )
     )
   )
 )
 
-# Bagian server dari aplikasi
+# --- Server Aplikasi ---
 server <- function(input, output, session) {
-  
-  # Membaca data training dari input
-  data <- reactive({
-    req(input$data)  # Tunggu sampai file diunggah
-    read_csv(input$data$datapath)  # Membaca file CSV ke dalam data.frame
+  # Membaca dataset training
+  train_data <- reactive({
+    req(input$train_data)
+    read_csv(input$train_data$datapath)
   })
   
-  # Menampilkan preview 6 baris awal dari dataset
-  output$datatable <- renderTable({
-    head(data())
+  # Membaca dataset testing
+  test_data <- reactive({
+    req(input$test_data)
+    read_csv(input$test_data$datapath)
   })
   
-  # Menampilkan statistik ringkasan dataset
+  # Dropdown pilihan variabel numerik X dan Y
+  output$var_select_ui <- renderUI({
+    req(train_data())
+    data <- train_data()
+    numeric_vars <- names(data)[sapply(data, is.numeric)]
+    tagList(
+      selectInput("x_var", "Pilih Variabel X:", choices = numeric_vars),
+      selectInput("y_var", "Pilih Variabel Y:", choices = numeric_vars)
+    )
+  })
+  
+  # Preview data
+  output$preview_table <- renderDT({
+    req(train_data())
+    datatable(head(train_data(), 20))
+  })
+  
+  # Ringkasan statistik
   output$summary <- renderPrint({
-    summary(data())
+    req(train_data())
+    summary(train_data())
   })
   
-  # UI dinamis: pilihan variabel X
-  output$xvar <- renderUI({
-    req(data())
-    selectInput("x", "Pilih Variabel X", choices = names(data()), multiple = TRUE)
+  # Matriks korelasi antar variabel numerik
+  output$cor_plot <- renderPlot({
+    req(train_data())
+    cor_matrix <- cor(train_data()[, sapply(train_data(), is.numeric)], use = "complete.obs")
+    corrplot(cor_matrix, method = "color", type = "upper", tl.col = "black", addCoef.col = "black")
   })
   
-  # UI dinamis: pilihan variabel Y (target)
-  output$yvar <- renderUI({
-    req(data())
-    selectInput("y", "Pilih Variabel Y", choices = names(data()))
-  })
-  
-  # UI dinamis: pilihan variabel warna (opsional, untuk visualisasi)
-  output$colorvar <- renderUI({
-    req(data())
-    selectInput("color", "Variabel Warna (opsional)", choices = names(data()))
-  })
-  
-  # Visualisasi korelasi antar variabel numerik dalam bentuk matriks
-  output$corrplot <- renderPlot({
-    df <- data() %>% select_if(is.numeric)  # Filter hanya variabel numerik
-    corr <- cor(df)  # Hitung korelasi antar kolom
-    corrplot(corr, method = "color", addCoef.col = "black")  # Plot dengan nilai korelasi
-  })
-  
-  # Visualisasi scatterplot antar variabel terpilih
-  output$scatterplot <- renderPlot({
-    req(input$x, input$y, input$color)  # Pastikan semua input tersedia
-    ggplot(data(), aes_string(x = input$x[1], y = input$y, color = input$color)) +
-      geom_point(size = 3) +
+  # Scatter plot antara X dan Y
+  output$scatter_plot <- renderPlot({
+    req(train_data(), input$x_var, input$y_var)
+    ggplot(train_data(), aes_string(x = input$x_var, y = input$y_var, color = input$y_var)) +
+      geom_point() +
+      scale_color_gradient(low = "blue", high = "red") +
       theme_minimal()
   })
   
-  # Variabel reaktif untuk menyimpan model regresi
-  model <- reactiveVal()
+  # Variabel reaktif untuk menyimpan model
+  model <- reactiveVal(NULL)
   
-  # Latih model regresi linier saat tombol "Latih Model" ditekan
-  observeEvent(input$train, {
-    req(input$x, input$y)  # Pastikan input tersedia
-    df <- data() %>% drop_na(all_of(c(input$y, input$x)))  # Hapus baris dengan nilai NA
-    formula <- as.formula(paste(input$y, "~", paste(input$x, collapse = "+")))  # Bentuk formula regresi
-    trained <- lm(formula, data = df)  # Latih model linier
-    model(trained)  # Simpan model ke variabel reaktif
-    saveRDS(trained, "model_simpan.rds")  # Simpan model ke file lokal (sementara)
+  # Membuat model regresi linier
+  observeEvent(input$build_model, {
+    req(train_data(), input$x_var, input$y_var)
+    formula <- as.formula(paste(input$y_var, "~", input$x_var))
+    model(lm(formula, data = train_data()))
   })
   
-  # Memuat model dari file .rds
+  # Menyimpan model ke file
+  observeEvent(input$save_model, {
+    req(model())
+    saveRDS(model(), file = "saved_model.rds")
+  })
+  
+  # Memuat model dari file
   observeEvent(input$load_model, {
     req(input$load_model)
-    mod <- readRDS(input$load_model$datapath)  # Baca file model
-    model(mod)  # Simpan ke variabel reaktif
+    loaded <- readRDS(input$load_model$datapath)
+    model(loaded)
   })
   
-  # Tampilkan ringkasan model (summary regresi)
-  output$modelsummary <- renderPrint({
+  # Ringkasan model
+  output$model_summary <- renderPrint({
     req(model())
     summary(model())
   })
   
-  # Plot aktual vs prediksi untuk data training
-  output$modelplot <- renderPlot({
+  # Metrik model (R-squared, p-value, dll)
+  output$model_metrics <- renderPrint({
     req(model())
-    df <- data()
-    df$pred <- predict(model(), newdata = df)  # Tambahkan kolom prediksi
-    ggplot(df, aes_string(x = input$y, y = "pred")) +
-      geom_point(color = "blue") +
-      geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
-      labs(title = "Plot Aktual vs Prediksi", x = "Aktual", y = "Prediksi")
+    glance(model())
   })
   
-  # Membuat prediksi pada dataset baru saat tombol "Prediksi Data Baru" ditekan
-  prediksi_data <- eventReactive(input$predict, {
-    req(input$newdata)
-    new_df <- read_csv(input$newdata$datapath)  # Membaca file data testing
-    mod <- model()  # Ambil model yang sudah dilatih
-    new_df$Prediksi_Y <- predict(mod, newdata = new_df)  # Tambahkan hasil prediksi
-    new_df
+  # Grafik prediksi vs aktual
+  output$actual_vs_pred <- renderPlot({
+    req(model())
+    pred <- predict(model(), newdata = train_data())
+    actual <- train_data()[[input$y_var]]
+    ggplot(data.frame(Actual = actual, Predicted = pred), aes(x = Actual, y = Predicted)) +
+      geom_point(color = "darkgreen") +
+      geom_smooth(method = "lm", se = FALSE, color = "red") +
+      theme_minimal()
   })
   
-  # Menampilkan hasil prediksi data baru (preview)
-  output$prediksi <- renderTable({
-    req(prediksi_data())
-    head(prediksi_data())
+  # Prediksi data testing
+  output$predicted_table <- renderDT({
+    req(model(), test_data())
+    tryCatch({
+      preds <- predict(model(), newdata = test_data())
+      result <- test_data()
+      result$Predicted_Y <- preds
+      datatable(result)
+    }, error = function(e) {
+      datatable(data.frame(Error = "Gagal melakukan prediksi. Pastikan struktur data testing sesuai."))
+    })
   })
-  
-  # Handler untuk menyimpan model sebagai file .rds yang dapat diunduh
-  output$savemodel <- downloadHandler(
-    filename = function() {
-      paste("model_regresi_", Sys.Date(), ".rds", sep = "")  # Nama file
-    },
-    content = function(file) {
-      saveRDS(model(), file)  # Simpan model ke file .rds untuk diunduh
-    }
-  )
 }
 
-# Jalankan aplikasi shiny
-shinyApp(ui, server)
+# --- Jalankan Aplikasi ---
+shinyApp(ui = ui, server = server)
